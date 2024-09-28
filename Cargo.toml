@@ -44,6 +44,10 @@ panic-handler-dummy = []
 system-alloc = []
 default = ["unwinder", "dwarf-expr", "hide-trace", "fde-phdr-dl", "fde-registry"]
 rustc-dep-of-std = ["core", "gimli/rustc-dep-of-std", "compiler_builtins"]
+compiler_builtins = ["dep:compiler_builtins"]
+core = ["dep:core"]
+libc = ["dep:libc"]
+spin = ["dep:spin"]
 
 [profile.release]
 debug = true
