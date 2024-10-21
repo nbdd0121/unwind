@@ -2,6 +2,8 @@ use core::fmt;
 use core::ops;
 use gimli::{Register, RiscV};
 
+use super::maybe_cfi;
+
 // Match DWARF_FRAME_REGISTERS in libgcc
 pub const MAX_REG_RULES: usize = 65;
 
@@ -176,10 +178,10 @@ pub extern "C-unwind" fn save_context(f: extern "C" fn(&mut Context, *mut ()), p
             "
             mv t0, sp
             add sp, sp, -0x190
-            .cfi_def_cfa_offset 0x190
-            sw ra, 0x180(sp)
-            .cfi_offset ra, -16
             ",
+            maybe_cfi!(".cfi_def_cfa_offset 0x190"),
+            "sw ra, 0x180(sp)",
+            maybe_cfi!(".cfi_offset ra, -16"),
             code!(save_gp),
             code!(save_fp),
             "
@@ -188,10 +190,10 @@ pub extern "C-unwind" fn save_context(f: extern "C" fn(&mut Context, *mut ()), p
             jalr t0
             lw ra, 0x180(sp)
             add sp, sp, 0x190
-            .cfi_def_cfa_offset 0
-            .cfi_restore ra
-            ret
             ",
+            maybe_cfi!(".cfi_def_cfa_offset 0"),
+            maybe_cfi!(".cfi_restore ra"),
+            "ret",
         );
     }
     #[cfg(not(target_feature = "d"))]
@@ -200,10 +202,10 @@ pub extern "C-unwind" fn save_context(f: extern "C" fn(&mut Context, *mut ()), p
             "
             mv t0, sp
             add sp, sp, -0x90
-            .cfi_def_cfa_offset 0x90
-            sw ra, 0x80(sp)
-            .cfi_offset ra, -16
             ",
+            maybe_cfi!(".cfi_def_cfa_offset 0x90"),
+            "sw ra, 0x80(sp)",
+            maybe_cfi!(".cfi_offset ra, -16"),
             code!(save_gp),
             "
             mv t0, a0
@@ -211,10 +213,10 @@ pub extern "C-unwind" fn save_context(f: extern "C" fn(&mut Context, *mut ()), p
             jalr t0
             lw ra, 0x80(sp)
             add sp, sp, 0x90
-            .cfi_def_cfa_offset 0
-            .cfi_restore ra
-            ret
             ",
+            maybe_cfi!(".cfi_def_cfa_offset 0"),
+            maybe_cfi!(".cfi_restore ra"),
+            "ret",
         );
     }
 }
