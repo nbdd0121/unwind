@@ -8,7 +8,7 @@ use alloc::{borrow::ToOwned, string::String};
 use unwinding::print::*;
 
 #[link(name = "c")]
-extern "C" {}
+unsafe extern "C" {}
 
 struct PrintOnDrop(String);
 
