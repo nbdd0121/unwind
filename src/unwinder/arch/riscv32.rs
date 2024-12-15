@@ -175,6 +175,7 @@ pub extern "C-unwind" fn save_context(f: extern "C" fn(&mut Context, *mut ()), p
     #[cfg(target_feature = "d")]
     unsafe {
         core::arch::naked_asm!(
+            maybe_cfi!(".cfi_startproc"),
             "
             mv t0, sp
             add sp, sp, -0x190
@@ -194,11 +195,13 @@ pub extern "C-unwind" fn save_context(f: extern "C" fn(&mut Context, *mut ()), p
             maybe_cfi!(".cfi_def_cfa_offset 0"),
             maybe_cfi!(".cfi_restore ra"),
             "ret",
+            maybe_cfi!(".cfi_endproc"),
         );
     }
     #[cfg(not(target_feature = "d"))]
     unsafe {
         core::arch::naked_asm!(
+            maybe_cfi!(".cfi_startproc"),
             "
             mv t0, sp
             add sp, sp, -0x90
@@ -217,6 +220,7 @@ pub extern "C-unwind" fn save_context(f: extern "C" fn(&mut Context, *mut ()), p
             maybe_cfi!(".cfi_def_cfa_offset 0"),
             maybe_cfi!(".cfi_restore ra"),
             "ret",
+            maybe_cfi!(".cfi_endproc"),
         );
     }
 }

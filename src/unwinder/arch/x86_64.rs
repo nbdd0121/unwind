@@ -63,6 +63,7 @@ pub extern "C-unwind" fn save_context(f: extern "C" fn(&mut Context, *mut ()), p
     // No need to save caller-saved registers here.
     unsafe {
         core::arch::naked_asm!(
+            maybe_cfi!(".cfi_startproc"),
             "sub rsp, 0x98",
             maybe_cfi!(".cfi_def_cfa_offset 0xA0"),
             "
@@ -91,7 +92,8 @@ pub extern "C-unwind" fn save_context(f: extern "C" fn(&mut Context, *mut ()), p
             add rsp, 0x98
             ",
             maybe_cfi!(".cfi_def_cfa_offset 8"),
-            "ret"
+            "ret",
+            maybe_cfi!(".cfi_endproc"),
         );
     }
 }

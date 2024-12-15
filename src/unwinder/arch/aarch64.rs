@@ -63,6 +63,7 @@ macro_rules! save {
     (gp$(, $fp:ident)?) => {
         // No need to save caller-saved registers here.
         core::arch::naked_asm!(
+            maybe_cfi!(".cfi_startproc"),
             "stp x29, x30, [sp, -16]!",
             maybe_cfi!("
             .cfi_def_cfa_offset 16
@@ -98,6 +99,7 @@ macro_rules! save {
             .cfi_restore x30
             "),
             "ret",
+            maybe_cfi!(".cfi_endproc"),
         );
     };
     (maybesavefp(fp)) => {
