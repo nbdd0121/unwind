@@ -82,7 +82,10 @@ macro_rules! code {
         "
     };
     (save_fp) => {
+        // arch option manipulation needed due to LLVM/Rust bug, see rust-lang/rust#80608
         "
+        .option push
+        .option arch, +d
         fsd fs0, 0xC0(sp)
         fsd fs1, 0xC8(sp)
         fsd fs2, 0x110(sp)
@@ -95,6 +98,7 @@ macro_rules! code {
         fsd fs9, 0x148(sp)
         fsd fs10, 0x150(sp)
         fsd fs11, 0x158(sp)
+        .option pop
         "
     };
     (restore_gp) => {
@@ -175,6 +179,7 @@ pub extern "C-unwind" fn save_context(f: extern "C" fn(&mut Context, *mut ()), p
     #[cfg(target_feature = "d")]
     unsafe {
         core::arch::naked_asm!(
+            maybe_cfi!(".cfi_startproc"),
             "
             mv t0, sp
             add sp, sp, -0x190
@@ -194,11 +199,13 @@ pub extern "C-unwind" fn save_context(f: extern "C" fn(&mut Context, *mut ()), p
             maybe_cfi!(".cfi_def_cfa_offset 0"),
             maybe_cfi!(".cfi_restore ra"),
             "ret",
+            maybe_cfi!(".cfi_endproc"),
         );
     }
     #[cfg(not(target_feature = "d"))]
     unsafe {
         core::arch::naked_asm!(
+            maybe_cfi!(".cfi_startproc"),
             "
             mv t0, sp
             add sp, sp, -0x90
@@ -217,6 +224,7 @@ pub extern "C-unwind" fn save_context(f: extern "C" fn(&mut Context, *mut ()), p
             maybe_cfi!(".cfi_def_cfa_offset 0"),
             maybe_cfi!(".cfi_restore ra"),
             "ret",
+            maybe_cfi!(".cfi_endproc")
         );
     }
 }
