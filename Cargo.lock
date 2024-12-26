@@ -76,7 +76,7 @@ dependencies = [
 
 [[package]]
 name = "unwinding"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "compiler_builtins",
  "gimli",
